@@ -32,7 +32,7 @@ def add(variable):
         return
     _storage[variable] = None
     _last_error = 0
-    pass
+
 
 def is_in(variable) -> bool:
     """
@@ -43,7 +43,7 @@ def is_in(variable) -> bool:
     global _storage
 
     return variable in _storage
-    pass
+
 
 def get(variable):
     """
@@ -63,7 +63,7 @@ def get(variable):
         return
     _last_error = 0
     return _storage[variable]
-    pass
+
 
 def set(variable, value):
     """
@@ -80,7 +80,7 @@ def set(variable, value):
         return
     _storage[variable] = value
     _last_error = 0
-    pass
+
 
 def input_var(variable):
     """
@@ -97,11 +97,11 @@ def input_var(variable):
     try:
         value = float(input("Введіть значення {}: ".format(variable)))
     except ValueError:
-        _last_error = 4
+        _last_error = 3
         return
     _storage[variable] = value
     _last_error = 0
-    pass
+
 
 def input_all():
     """
@@ -113,7 +113,7 @@ def input_all():
 
     for variable in _storage:
         input_var(variable)
-    pass
+    
 
 def clear():
     """
@@ -123,7 +123,7 @@ def clear():
     global _storage
 
     _storage = {}
-    pass
+    
 
 def get_last_error():
     """
@@ -135,7 +135,6 @@ def get_last_error():
     """
     global _last_error
     return _last_error
-    pass
 
 
 if __name__ == "__main__":
