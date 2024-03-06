@@ -35,7 +35,7 @@ from tokenizer import get_tokens, Token
 
 # словник множин допустимих наступних токенів для заданого токена
 VALID_PAIRS = {
-    "variable": {"operation", "right_paren"},
+    "variable": {"operation", "right_paren", "equal"},
     "constant": {"operation", "right_paren"},
     "operation": {"variable", "constant", "left_paren"},
     "equal": {"variable", "constant", "left_paren"},
@@ -62,24 +62,26 @@ VALID_END = ('variable', 'constant', 'right_paren')
 
 def check_assignment_syntax(tokens):
     """Функція перевіряє синтаксичну правильність присвоєння за списком токенів.
-
     Повертає True/False та рядок помилки.
     Якщо помилки немає, то повертає порожній рядок.
     Використовує функцію check_expression_syntax
-
     :param tokens: список токенів типу Token (див. tokenizer.py)
     :return:
         success: булівське значення
         error: рядок помилки
     """
-    if len(tokens) < 3:
-        return False, ERRORS["empty_expr"]
-    if tokens[0].type != "variable":
-        return False, ERRORS["invalid_start"]
-    if tokens[1].type != "equal":
-        return False, ERRORS["incorrect_assignment"]
-    return check_expression_syntax(tokens[2:])
-    pass
+    success, error = check_expression_syntax(tokens)
+
+    if not success:
+        return success, error
+    if tokens[-2].type != "equal": 
+        success = False
+        error = ERRORS["incorrect_assignment"]
+    if len(tokens) > 3:
+        success = True
+        error = ""
+
+    return success, error
 
 
 def check_expression_syntax(tokens):
@@ -94,16 +96,30 @@ def check_expression_syntax(tokens):
         success: булівське значення
         error: рядок помилки
     """
-    tokens = [Token("left_paren", "(")] + tokens + [Token("right_paren", ")")]
+    success = True
+    error = ""
 
-    if len(tokens) == 2:
-        return False, ERRORS["empty_expr"]
+    if len(tokens) < 3:
+        success = False
+        error = ERRORS["empty_expr"]
+        return success, error
+    
     if not _check_parens(tokens):
-        return False, ERRORS["incorrect_parens"]
+        success = False
+        error = ERRORS["incorrect_parens"]
+        return success, error
+    
     for i in range(len(tokens) - 1):
         if not _check_pair(tokens[i], tokens[i + 1]):
-            return False, ERRORS["invalid_pair"].format(tokens[i], tokens[i + 1])
-    return True, ""
+            success = False
+            error = ERRORS["invalid_pair"].format(tokens[i], tokens[i + 1])
+            return success, error
+
+    if not _check_start_end(tokens):
+        success = False
+        error = ERRORS["invalid_start"]
+
+    return success, error
 
 
 def _check_parens(tokens):
@@ -113,16 +129,16 @@ def _check_parens(tokens):
     :param tokens: список токенів
     :return: success - булівське значення
     """
-    stack = []
+    balance = 0
     for token in tokens:
         if token.type == "left_paren":
-            stack.append(token)
+            balance += 1
         elif token.type == "right_paren":
-            if not stack:
-                return False
-            stack.pop()
-    return not stack
-    pass
+            balance -= 1
+        if balance < 0:
+            return False
+    if balance == 0:
+        return True
 
 
 def _check_pair(token, next_token):
@@ -135,7 +151,6 @@ def _check_pair(token, next_token):
     :return: success - булівське значення
     """
     return next_token.type in VALID_PAIRS[token.type]
-    pass
 
 
 def _check_start_end(tokens):
@@ -145,12 +160,11 @@ def _check_start_end(tokens):
     :param tokens: список токенів
     :return: success -- True/False
     """
-    return (
-        tokens[0].type in VALID_START
-        and tokens[-1].type in VALID_END
-        and len(tokens) >= 1
-    )
-    pass
+    if not tokens:
+        return True
+    if tokens[0].type not in VALID_START or tokens[-1].type not in VALID_END:
+        return False
+    return True
 
 
 if __name__ == "__main__":
@@ -164,6 +178,7 @@ if __name__ == "__main__":
     success8, error8 = check_assignment_syntax(get_tokens("x + y"))
     success9, error9 = check_assignment_syntax(get_tokens("x ="))
     success10, error10 = check_assignment_syntax(get_tokens("x = (a+b)"))
+    success11, error11 = check_assignment_syntax(get_tokens("(x = a+b)"))
 
     assert not success1 and error1 == 'Неправильно розставлені дужки'
     assert not success2 and error2 == "Недопустима пара токенів Token(type='operation', value='*'), Token(type='operation', value='/')"
@@ -174,6 +189,7 @@ if __name__ == "__main__":
     assert not success8 and error8 == "Неправильне присвоєння"
     assert not success9 and error9 == "Порожній вираз"
     assert success10 and error10 == ""
+    assert success11 and error11 == ""
 
     print("Success =", True)
 
