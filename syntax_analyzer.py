@@ -82,12 +82,12 @@ def check_expression_syntax(tokens):
         success: булівське значення
         error: рядок помилки
     """
-    tokens = [Token("left_paren", "(")] + tokens + [Token("right_paren", ")")]
-
     if len(tokens) < 3:
         return False, ERRORS["empty_expr"]
     if not _check_parens(tokens):
         return False, ERRORS["incorrect_parens"]
+    if _check_start_end(tokens) != True:
+        return False, ERRORS["invalid_start"]
     for i in range(len(tokens) - 1):
         if not _check_pair(tokens[i], tokens[i + 1]):
             return False, ERRORS["invalid_pair"].format(tokens[i], tokens[i + 1])
