@@ -24,15 +24,13 @@ def add(variable):
     :param variable: змінна
     :return: Код помилки (int)
     """
-    global _last_error
+    global _storage, _last_error
 
     if variable in _storage:
         _last_error = 1
-    else:
-        _storage[variable] = None
-        _last_error = 0
-
-    return _last_error
+        return
+    _storage[variable] = None
+    _last_error = 0
 
 
 def is_in(variable) -> bool:
@@ -41,6 +39,7 @@ def is_in(variable) -> bool:
     :param variable: змінна
     :return: булівське значенна (True, якщо є)
     """
+    global _storage
 
     return variable in _storage
 
@@ -53,17 +52,16 @@ def get(variable):
     :param variable: змінна
     :return: значення змінної або None, якщо змінна не існує або невизначена
     """
-    global storage, _last_error
+    global _storage, _last_error
 
-    if is_in(variable) == False:
+    if variable not in _storage:
         _last_error = 2
-        return None
-    elif _storage[variable] is None:
+        return
+    if _storage[variable] is None:
         _last_error = 3
-        return None
-    else:
-        _last_error = 0
-        return _storage[variable]
+        return
+    _last_error = 0
+    return _storage[variable]
 
 
 def set(variable, value):
@@ -76,13 +74,11 @@ def set(variable, value):
     """
     global _storage, _last_error
 
-    if not is_in(variable):
+    if variable not in _storage:
         _last_error = 2
-        return None
-
+        return
     _storage[variable] = value
     _last_error = 0
-    return _last_error
 
 
 def input_var(variable):
@@ -92,20 +88,18 @@ def input_var(variable):
     :param variable: змінна
     :return: Код помилки (int)
     """
-    global _last_error
+    global _storage, _last_error
 
-    if not is_in(variable):
+    if variable not in _storage:
         _last_error = 2
-        return None
+        return
     try:
-        value = float(input(f"Введіть значення {variable}: "))
+        value = float(input("Введіть значення {}: ".format(variable)))
     except ValueError:
         _last_error = 3
-        return None
-
+        return
     _storage[variable] = value
     _last_error = 0
-    return _last_error
 
 
 def input_all():
@@ -114,6 +108,7 @@ def input_all():
     усіх змінних з пам'яті
     :return: Код помилки (int)
     """
+    global _storage
 
     for variable in _storage:
         input_var(variable)
@@ -126,7 +121,7 @@ def clear():
     """
     global _storage
 
-    _storage.clear()
+    _storage = {}
 
 
 def get_last_error():
@@ -137,6 +132,7 @@ def get_last_error():
 
     :return: код останньої помилки
     """
+    global _last_error
     return _last_error
 
 
