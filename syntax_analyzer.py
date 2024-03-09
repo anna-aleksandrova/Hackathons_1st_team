@@ -82,7 +82,7 @@ def check_expression_syntax(tokens):
         success: булівське значення
         error: рядок помилки
     """
-    if len(tokens) < 3:
+    if len(tokens) < 1:
         return False, ERRORS["empty_expr"]
     if not _check_parens(tokens):
         return False, ERRORS["incorrect_parens"]
