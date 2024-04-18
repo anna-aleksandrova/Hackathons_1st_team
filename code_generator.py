@@ -122,15 +122,13 @@ def _generate_line_code(program_line: str):
     tokens = get_tokens(program_line)
     res, error = check_assignment_syntax(tokens)
     code = []
-    if res == True:
+    if res:
         _expression(code, tokens[2:])
         code.append(("SET", tokens[0].value))
         if is_in(tokens[0].value):
             pass
         else:
             add(tokens[0].value)
-    elif res == False and error == "Порожній вираз":
-        pass
     else:
         pass
     code = [el for el in code if el is not None]
