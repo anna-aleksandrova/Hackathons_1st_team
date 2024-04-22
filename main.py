@@ -86,10 +86,10 @@ def mainloop():
             show_help()
         elif line == 'clear()': 
             clear() 
-        elif line.startswith('exec'): 
+        elif line.startswith('exec(') and line.endswith(')'):
             filename = line[len('exec('):-1]
             exec_program(filename)
-        elif line.startswith('print'): 
+        elif line.startswith('print(') and line.endswith(')'):
             variable = line[len('print('):-1]
             print_var(variable)
         else: 
